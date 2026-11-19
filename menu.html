@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thực đơn | Matty Matcha</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/menu.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="header-container">
+
+            <!-- Logo -->
+            <a href="index.html" class="logo">
+                <img src="images/logo/logo1.jpg" alt="Matty Matcha">
+                <span>Matty Matcha</span>
+            </a>
+
+            <!-- Search -->
+            <form class="search-box" id="search-form">
+                <input
+                    type="search"
+                    id="search-input"
+                    placeholder="Tìm kiếm sản phẩm..."
+                >
+                <button type="submit" aria-label="Tìm kiếm">⌕</button>
+            </form>
+
+            <!-- Header Actions -->
+            <div class="header-actions">
+
+                <a href="tel:0907181552" class="hotline">
+                    <span class="action-icon">☎</span>
+                    <span>
+                        Giao tận nơi
+                        <strong>0907181552</strong>
+                    </span>
+                </a>
+
+                <a href="#" class="account">
+                    <span class="action-icon">◎</span>
+                    <span>
+                        Tài khoản
+                        <small>Đăng nhập</small>
+                    </span>
+                </a>
+
+                <a href="cart.html" class="cart-button">
+                    <span>🛒</span>
+                    Giỏ hàng
+                    <span class="cart-count" id="cart-count">0</span>
+                </a>
+
+            </div>
+
+            <button class="mobile-menu-btn" id="mobile-menu-btn"
+                    aria-label="Mở danh mục" aria-expanded="false">
+                ☰
+            </button>
+
+        </div>
+    </header>
+
+
+    <main>
+        <section class="menu-page">
+            <div class="section-heading">
+                <h2>THỰC ĐƠN MATTY MATCHA</h2>
+                <p>Khám phá các món matcha yêu thích của bạn</p>
+            </div>
+
+            <div class="main-layout">
+
+                <aside class="sidebar" id="sidebar">
+
+                    <div class="sidebar-title">
+                        <strong>Danh mục sản phẩm</strong>
+                    </div>
+
+                    <ul class="category-list">
+                        <li>
+                            <button class="category-item active" data-category="all">
+                                - Tất cả sản phẩm
+                            </button>
+                        </li>
+
+                        <li>
+                            <button class="category-item" data-category="matcha-truyen-thong">
+                                  + Matcha truyền thống
+                            </button>
+                        </li>
+
+                        <li>
+                            <button class="category-item" data-category="matcha-kem-beo">
+                                  + Matcha kem béo
+                            </button>
+                        </li>
+
+                        <li>
+                            <button class="category-item" data-category="matcha-trai-cay">
+                                  + Matcha trái cây
+                            </button>
+                        </li>
+
+                        <li>
+                            <button class="category-item" data-category="other">
+                                  + Matcha khác
+                            </button>
+                        </li>
+                    </ul>
+
+                </aside>
+
+                <section class="menu-content">
+
+
+
+                    <div class="products-grid" id="products-grid"> </div>
+
+                    <p id="no-results" hidden>
+                        Không tìm thấy sản phẩm phù hợp.
+                    </p>
+
+                </section>
+
+            </div>
+        </section>
+    </main>
+
+    <script src="js/main.js" defer></script>
+    <script src="js/menu.js" defer></script>
+
+</body>
+</html>
