@@ -2,13 +2,20 @@
 let products = [];
 const productsGrid = document.querySelector('#products-grid');
 
-fetch("http://127.0.0.1:8000/api/products")
-    .then(function(response){
+fetch("https://matty-matcha-api.onrender.com/api/products")
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error("Lỗi HTTP: " + response.status);
+        }
+
         return response.json();
     })
-    .then(function(data){
+    .then(function(data) {
         products = data;
         renderProducts();
+    })
+    .catch(function(error) {
+        console.error("Không tải được sản phẩm:", error);
     });
 // Render
 function renderProducts(){

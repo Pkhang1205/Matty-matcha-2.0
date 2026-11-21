@@ -83,5 +83,4 @@ SELECT TOP 10 *
 FROM dbo.chitiet_donhang
 ORDER BY 1 DESC;
 
-SELECT DISTINCT danh_muc
-FROM sanpham;
+SELECT * FROM donhang;
