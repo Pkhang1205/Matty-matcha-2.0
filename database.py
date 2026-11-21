@@ -1,23 +1,33 @@
+
 from dotenv import load_dotenv
 from pathlib import Path
 import os
-import pyodbc
+import psycopg
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
+
 def get_connection():
-    connection_string = (
-        "DRIVER={ODBC Driver 18 for SQL Server};"
-        "SERVER=localhost,1433;"
-        "DATABASE=MattyMatcha;"
-        f"UID={os.getenv('DB_USER')};"
-        f"PWD={os.getenv('DB_PASSWORD')};"
-        "Encrypt=yes;"
-        "TrustServerCertificate=yes;"
+    connection = psycopg.connect(
+        host=os.getenv("PG_HOST", "localhost"),
+        port=os.getenv("PG_PORT", "5432"),
+        dbname=os.getenv("PG_DATABASE", "MattyMatcha"),
+        user=os.getenv("PG_USER"),
+        password=os.getenv("PG_PASSWORD"),
+        sslmode="require",
     )
 
-    print("DB_USER:", os.getenv("DB_USER"))
-    print("DB_PASSWORD exists:", bool(os.getenv("DB_PASSWORD")))
-    print("SERVER: localhost,1433")
-    return pyodbc.connect(connection_string)
+    print("Connected to PostgreSQL!")
+    return connection
+
+def get_local_connection():
+    connection = psycopg.connect(
+        host="localhost",
+        port=5432,
+        dbname="MattyMatcha",
+        user="postgres",
+        password=os.getenv("LOCAL_PG_PASSWORD")
+    )
+    print("Connected to Local PostgreSQL!")
+    return connection

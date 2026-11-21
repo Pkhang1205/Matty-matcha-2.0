@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, HTTPException
 from database import get_connection
 from pydantic import BaseModel
@@ -7,9 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+
 class OrderItem(BaseModel):
     product_id: int
     quantity: int
+
 
 class Customer(BaseModel):
     name: str
@@ -17,52 +20,60 @@ class Customer(BaseModel):
     address: str
     note: Optional[str] = ""
 
+
 class OrderData(BaseModel):
     customer: Customer
     items: List[OrderItem]
-    
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500","https://mattymatcha.netlify.app",],
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "https://matty-matcha.netlify.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def home():
     return {"message": "Matty Matcha API"}
+
 
 @app.get("/api/products")
 def get_products():
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT ma_sp, ten_sp, gia_sp, mo_ta, hinh_anh, danh_muc
-        FROM sanpham
-        WHERE trang_thai = 1
-    """)
+    try:
+        cursor.execute("""
+            SELECT ma_sp, ten_sp, gia_sp, mo_ta, hinh_anh, danh_muc
+            FROM sanpham
+            WHERE trang_thai = TRUE
+        """)
 
-    rows = cursor.fetchall()
+        rows = cursor.fetchall()
 
-    products = []
+        products = []
 
-    for row in rows:
-        products.append({
-            "id": row[0],
-            "name": row[1],
-            "price": float(row[2]),
-            "description": row[3],
-            "image": row[4],
-            "category": row[5],
-        })
+        for row in rows:
+            products.append({
+                "id": row[0],
+                "name": row[1],
+                "price": float(row[2]),
+                "description": row[3],
+                "image": row[4],
+                "category": row[5],
+            })
 
-    cursor.close()
-    conn.close()
+        return products
 
-    return products
-
+    finally:
+        cursor.close()
+        conn.close()
 
 
 @app.post("/api/orders")
@@ -82,7 +93,7 @@ def create_order(order: OrderData):
         total = Decimal("0.00")
         order_items = []
 
-        # 2. Kiểm tra sản phẩm và lấy giá từ SQL Server
+        # 2. Kiểm tra sản phẩm và lấy giá từ PostgreSQL
         for item in order.items:
 
             if item.quantity <= 0:
@@ -94,7 +105,7 @@ def create_order(order: OrderData):
             cursor.execute("""
                 SELECT gia_sp
                 FROM sanpham
-                WHERE ma_sp = ? AND trang_thai = 1
+                WHERE ma_sp = %s AND trang_thai = TRUE
             """, (item.product_id,))
 
             product = cursor.fetchone()
@@ -121,7 +132,7 @@ def create_order(order: OrderData):
         cursor.execute("""
             SELECT ma_khachhang
             FROM khachhang
-            WHERE so_dien_thoai = ?
+            WHERE so_dien_thoai = %s
         """, (order.customer.phone,))
 
         customer = cursor.fetchone()
@@ -132,8 +143,8 @@ def create_order(order: OrderData):
             # Cập nhật thông tin khách hàng
             cursor.execute("""
                 UPDATE khachhang
-                SET ho_ten = ?, dia_chi = ?
-                WHERE ma_khachhang = ?
+                SET ho_ten = %s, dia_chi = %s
+                WHERE ma_khachhang = %s
             """, (
                 order.customer.name,
                 order.customer.address,
@@ -143,9 +154,11 @@ def create_order(order: OrderData):
         else:
             # Tạo khách hàng mới
             cursor.execute("""
-                INSERT INTO khachhang (ho_ten, so_dien_thoai, dia_chi)
-                OUTPUT INSERTED.ma_khachhang
-                VALUES (?, ?, ?)
+                INSERT INTO khachhang (
+                    ho_ten, so_dien_thoai, dia_chi
+                )
+                VALUES (%s, %s, %s)
+                RETURNING ma_khachhang
             """, (
                 order.customer.name,
                 order.customer.phone,
@@ -158,13 +171,12 @@ def create_order(order: OrderData):
         cursor.execute("""
             INSERT INTO donhang (
                 ma_khachhang,
-                ngay_dat,
                 tong_tien,
                 trang_thai,
                 ghi_chu
             )
-            OUTPUT INSERTED.ma_donhang
-            VALUES (?, GETDATE(), ?, ?, ?)
+            VALUES (%s, %s, %s, %s)
+            RETURNING ma_donhang
         """, (
             customer_id,
             total,
@@ -184,7 +196,7 @@ def create_order(order: OrderData):
                     so_luong,
                     don_gia
                 )
-                VALUES (?, ?, ?, ? )
+                VALUES (%s, %s, %s, %s)
             """, (
                 order_id,
                 item["product_id"],
@@ -209,11 +221,12 @@ def create_order(order: OrderData):
     except Exception as e:
         conn.rollback()
         print("LỖI LƯU ĐƠN HÀNG:", repr(e))
+
         raise HTTPException(
             status_code=500,
             detail="Lỗi khi lưu đơn hàng"
         ) from e
-        
+
     finally:
         cursor.close()
         conn.close()
